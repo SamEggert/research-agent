@@ -8,6 +8,7 @@ import {
   addEdge,
   MiniMap,
   Controls,
+  Connection
 } from "@xyflow/react";
 import CustomNode from "./CustomNode";
 import "@xyflow/react/dist/style.css";
@@ -51,12 +52,12 @@ const initEdges = [
 ];
 
 export default function FlowExamplePage() {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initNodes);
+  const [nodes, , onNodesChange] = useNodesState(initNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initEdges);
 
   const onConnect = useCallback(
-    (params: any) => setEdges((eds) => addEdge(params, eds)),
-    []
+    (params: Connection) => setEdges((eds) => addEdge(params, eds)),
+    [setEdges]
   );
 
   return (
