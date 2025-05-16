@@ -11,11 +11,14 @@ export const showMapMarkersTool = createTool({
   inputSchema: z.object({
     places: z.array(
       z.object({
+        id: z.string(),
         name: z.string(),
         lat: z.number(),
         lng: z.number(),
         address: z.string().optional(),
         description: z.string().optional(),
+        businessStatus: z.string().optional(),
+        rating: z.number().optional(),
       })
     ),
   }),
@@ -25,6 +28,8 @@ export const showMapMarkersTool = createTool({
   }),
   execute: async ({ context }) => {
     console.log('showMapMarkersTool', context);
+    // Clear previous markers
+    await redis.del('latest-map-markers');
     // Store markers globally (or per session if you want)
     await redis.set('latest-map-markers', JSON.stringify(context.places));
     return { success: true, message: "Markers stored in Redis" };

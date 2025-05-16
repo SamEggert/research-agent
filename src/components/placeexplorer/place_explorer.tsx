@@ -15,6 +15,8 @@ const PlaceExplorer = () => {
             address={selectedPlace.address}
             rating={selectedPlace.rating}
             reviews={selectedPlace.reviews}
+            businessStatus={selectedPlace.businessStatus}
+            description={selectedPlace.description}
           />
         ) : (
           <div className="text-gray-400">Select a marker to see details</div>
