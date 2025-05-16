@@ -14,6 +14,7 @@
     "@mastra/core": "^0.9.4",
     "@mastra/libsql": "^0.0.4",
     "@mastra/memory": "^0.3.4",
+    "@neondatabase/serverless": "^1.0.0",
     "@react-google-maps/api": "^2.20.6",
     "@vercel/blob": "^1.0.1",
     "@vercel/kv": "^3.0.0",

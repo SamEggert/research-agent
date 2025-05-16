@@ -1,0 +1,65 @@
+-- Drop existing tables if they exist, to start fresh
+-- CASCADE will drop any dependent objects (like foreign key constraints)
+DROP TABLE IF EXISTS recommendations CASCADE;
+DROP TABLE IF EXISTS preferences CASCADE;
+
+-- Create a function to update the updated_at column automatically
+-- This function is used by the triggers below
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+
+-- Table to store the global context preferences for the LLM
+-- This table will typically only ever have one row.
+CREATE TABLE preferences (
+    id SERIAL PRIMARY KEY, -- Unique ID for this row (will likely be 1)
+    -- Store the list of text preferences for the LLM as a Postgres text array
+    llm_notes TEXT[] DEFAULT '{}', -- TEXT[] is a native Postgres array type for strings
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+
+-- Table to store the restaurant recommendations
+CREATE TABLE recommendations (
+    id SERIAL PRIMARY KEY, -- Unique ID for this recommendation entry in the DB
+    -- Link back to the single row in the preferences table
+    preferences_id INTEGER REFERENCES preferences(id) ON DELETE CASCADE NOT NULL, -- Link to the global preferences row (likely will be 1)
+
+    -- Fields from the Google Places API response you want to store
+    place_id TEXT UNIQUE NOT NULL, -- The unique Google Place ID
+    display_name TEXT NOT NULL,    -- The name of the place
+    latitude DOUBLE PRECISION NOT NULL, -- Geographic latitude
+    longitude DOUBLE PRECISION NOT NULL, -- Geographic longitude
+    business_status TEXT,           -- e.g., OPERATIONAL, CLOSED_TEMPORARILY
+    rating DOUBLE PRECISION,        -- Numeric rating
+    user_total_rating INTEGER,      -- Total number of ratings
+    address TEXT,                   -- Formatted address
+    google_maps_uri TEXT,           -- Link to Google Maps
+
+    -- Optional: You might want to store more data from the API response later.
+    -- A JSONB column is flexible for this.
+    api_response_data JSONB,
+
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    -- Optional: last time this recommendation was updated or verified
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+
+-- Trigger to automatically update the updated_at column on changes to the preferences table
+CREATE TRIGGER update_preferences_updated_at
+BEFORE UPDATE ON preferences
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
+
+-- Trigger to automatically update the updated_at column on changes to the recommendations table
+CREATE TRIGGER update_recommendations_updated_at
+BEFORE UPDATE ON recommendations
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();

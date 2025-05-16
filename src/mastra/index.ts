@@ -1,9 +1,9 @@
-
 import { Mastra } from '@mastra/core/mastra';
 import { createLogger } from '@mastra/core/logger';
 import { LibSQLStore } from '@mastra/libsql';
 
 import { recommendationAgent } from './agents';
+import { recommendationWorkflow } from "./workflow/recommendationWorkflow";
 
 export const mastra = new Mastra({
   agents: { recommendationAgent },
@@ -15,4 +15,5 @@ export const mastra = new Mastra({
     name: 'Mastra',
     level: 'info',
   }),
+  workflows: { recommendationWorkflow },
 });

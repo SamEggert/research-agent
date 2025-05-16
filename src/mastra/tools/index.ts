@@ -124,3 +124,5 @@ const getPlacesWithReviews = async (textQuery: string, maxResults: number = 5) =
 };
 
 export * from './showMapMarkers';
+export * from './addRecommendation';
+export * from './updatePreferences';
