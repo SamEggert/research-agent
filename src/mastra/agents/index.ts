@@ -2,6 +2,7 @@ import { google } from '@ai-sdk/google';
 import { Agent } from '@mastra/core/agent';
 import { Memory } from '@mastra/memory';
 import { LibSQLStore } from '@mastra/libsql';
+import { placesWithReviewsTool } from '../tools/index';
 
 export const recommendationAgent = new Agent({
   name: 'Recommendation Agent',
@@ -11,7 +12,7 @@ export const recommendationAgent = new Agent({
     If you need more information, ask clarifying questions.
   `,
   model: google('gemini-2.5-flash-preview-04-17'),
-  tools: {},
+  tools: { placesWithReviewsTool },
   memory: new Memory({
     storage: new LibSQLStore({
       url: 'file:../mastra.db',

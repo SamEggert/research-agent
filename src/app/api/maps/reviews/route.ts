@@ -1,3 +1,10 @@
+/*
+Working example:
+
+curl "http://localhost:3000/api/maps/reviews?placeId=ChIJqdNaaBVbwokRLTafYrQlZI8"
+
+*/
+
 import { NextRequest, NextResponse } from "next/server";
 
 const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_API_KEY; // Store your API key in .env.local
