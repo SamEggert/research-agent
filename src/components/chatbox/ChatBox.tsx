@@ -77,8 +77,10 @@ const ChatBox: React.FC = () => {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto border border-gray-700 rounded p-4 bg-gray-900 shadow-lg text-gray-100">
-      <MessageList messages={messages} />
+    <div className="w-full h-full border border-gray-700 rounded p-4 bg-gray-900 shadow-lg text-gray-100 flex flex-col">
+      <div className="flex-1 overflow-y-auto">
+        <MessageList messages={messages} />
+      </div>
       <MessageInput onSend={handleSend} />
     </div>
   );
