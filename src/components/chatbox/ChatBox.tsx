@@ -3,7 +3,11 @@ import React, { useState } from "react";
 import MessageList, { Message } from "./MessageList";
 import MessageInput from "./MessageInput";
 
-const ChatBox: React.FC = () => {
+interface ChatBoxProps {
+  fetchMarkers: () => Promise<void>;
+}
+
+const ChatBox: React.FC<ChatBoxProps> = ({ fetchMarkers }) => {
   const [messages, setMessages] = useState<Message[]>([]);
 
   const handleSend = async (text: string) => {
@@ -40,6 +44,9 @@ const ChatBox: React.FC = () => {
         ...msgs,
         { id: Date.now() + Math.random(), text: botText, sender: "bot" as const },
       ]);
+
+      // Fetch latest markers after chat
+      await fetchMarkers();
     } catch (err: any) {
       console.error("API error:", err);
       setMessages((msgs) => [

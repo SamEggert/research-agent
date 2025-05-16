@@ -3,7 +3,12 @@ import React, { useState } from 'react';
 import MapComponent from './map';
 import LocationSummary from './location_summary';
 
-const PlaceExplorer = () => {
+interface PlaceExplorerProps {
+  markers: any[];
+  fetchMarkers: () => Promise<void>;
+}
+
+const PlaceExplorer: React.FC<PlaceExplorerProps> = ({ markers, fetchMarkers }) => {
   const [selectedPlace, setSelectedPlace] = useState<any | null>(null);
 
   return (
@@ -25,6 +30,8 @@ const PlaceExplorer = () => {
       </div>
       <div className="flex-1 min-h-0 bg-white rounded-xl shadow-lg border border-gray-200 flex items-center justify-center p-4">
         <MapComponent
+          markers={markers}
+          fetchMarkers={fetchMarkers}
           onSelectPlace={place => setSelectedPlace({
             ...place,
             reviews: Array.isArray(place.reviews) ? place.reviews : []
