@@ -21,11 +21,29 @@ interface LocationSummaryProps {
   reviews: Review[];
   businessStatus?: string;
   description?: string;
+  photoName?: string;
 }
 
-const LocationSummary: React.FC<LocationSummaryProps> = ({ name, address, rating, reviews, businessStatus, description }) => {
+const GOOGLE_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
+const LocationSummary: React.FC<LocationSummaryProps> = ({ name, address, rating, reviews, businessStatus, description, photoName }) => {
+  const photoUrl = photoName
+    ? `https://places.googleapis.com/v1/${photoName}/media?maxHeightPx=400&maxWidthPx=400&key=${GOOGLE_API_KEY}`
+    : null;
+
   return (
-    <div className="border border-gray-200 rounded-lg p-2 w-full max-h-80 overflow-y-auto">
+    <div className=" rounded-lg p-4 w-full max-h-95 overflow-y-auto">
+      {photoUrl ? (
+        <img
+          src={photoUrl}
+          alt={name}
+          className="w-full h-48 object-cover rounded-md mb-2"
+        />
+      ) : (
+        <div className="w-full h-48 flex items-center justify-center bg-gray-100 rounded-md mb-2 text-gray-400">
+          No photo available
+        </div>
+      )}
       <h2 className="text-2xl font-bold mb-1">{name}</h2>
       <div className="text-gray-600 mb-2">{address}</div>
       <div className="font-medium mb-4">Rating: {rating} <span className="text-yellow-500">⭐</span></div>
@@ -42,6 +60,10 @@ const LocationSummary: React.FC<LocationSummaryProps> = ({ name, address, rating
               src={review.author.photoUrl}
               alt={review.author.name}
               className="w-12 h-12 rounded-full mr-4 object-cover"
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = '/default-avatar.png';
+              }}
             />
             <div>
               <div className="flex items-center mb-1">

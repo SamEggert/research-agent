@@ -9,29 +9,28 @@ export const showMapMarkersTool = createTool({
   id: 'show-map-markers',
   description: 'Show specific places as markers on the map in the UI.',
   inputSchema: z.object({
-    places: z.array(
-      z.object({
-        id: z.string(),
-        name: z.string(),
-        lat: z.number(),
-        lng: z.number(),
-        address: z.string().optional(),
-        description: z.string().optional(),
-        businessStatus: z.string().optional(),
-        rating: z.number().optional(),
-      })
-    ),
+    placeIds: z.array(z.string()),
   }),
   outputSchema: z.object({
     success: z.boolean(),
     message: z.string().optional(),
   }),
   execute: async ({ context }) => {
-    console.log('showMapMarkersTool', context);
-    // Clear previous markers
-    await redis.del('latest-map-markers');
-    // Store markers globally (or per session if you want)
-    await redis.set('latest-map-markers', JSON.stringify(context.places));
+    const { placeIds } = context;
+    // Fetch details for each placeId (from your API or Google Places, etc.)
+    const places = await Promise.all(
+      placeIds.map(async (id) => {
+        // Replace this with your actual fetch logic
+        const res = await fetch(`http://localhost:3000/api/maps/reviews?placeId=${id}`);
+        const data = await res.json();
+        return {
+          id,
+          ...data.place, // or whatever structure you want
+        };
+      })
+    );
+    // Store or use the places array as needed
+    await redis.set('latest-map-markers', JSON.stringify(places));
     return { success: true, message: "Markers stored in Redis" };
   },
 });

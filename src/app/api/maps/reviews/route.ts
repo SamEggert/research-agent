@@ -22,6 +22,9 @@ export async function GET(req: NextRequest) {
     "formatted_address",
     "rating",
     "reviews",
+    "geometry/location",
+    "business_status",
+    "editorial_summary",
   ].join(",");
 
   const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=${fields}&key=${GOOGLE_PLACES_API_KEY}`;
@@ -31,6 +34,21 @@ export async function GET(req: NextRequest) {
 
   if (data.status !== "OK") {
     return NextResponse.json({ error: data.error_message || "Failed to fetch place details" }, { status: 500 });
+  }
+
+  // Fetch photoName from your own API
+  let photoName = undefined;
+  try {
+    // Use absolute URL for local dev or deployment
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    const photoRes = await fetch(`${baseUrl}/api/maps/photo?placeId=${placeId}`);
+    const photoData = await photoRes.json();
+    if (photoData.photoName) {
+      photoName = photoData.photoName;
+    }
+  } catch (e) {
+    // Optionally log error
+    photoName = undefined;
   }
 
   // Extract reviews and author attributions
@@ -51,7 +69,12 @@ export async function GET(req: NextRequest) {
       name: data.result.name,
       address: data.result.formatted_address,
       rating: data.result.rating,
+      lat: data.result.geometry?.location?.lat,
+      lng: data.result.geometry?.location?.lng,
+      businessStatus: data.result.business_status,
+      description: data.result.editorial_summary?.overview,
       reviews,
+      photoName,
     },
   });
 }
