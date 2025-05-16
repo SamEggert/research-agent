@@ -30,7 +30,7 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSend }) => {
         placeholder="Type a message..."
       />
       <button
-        className="bg-blue-500 hover:bg-blue-600 text-white w-10 h-10 rounded-lg flex items-center justify-center transition-colors shadow"
+        className="bg-gray-700 hover:bg-gray-500 text-white w-10 h-10 rounded-lg flex items-center justify-center transition-colors shadow"
         onClick={handleSend}
         aria-label="Send"
       >

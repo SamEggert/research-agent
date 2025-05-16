@@ -44,7 +44,7 @@ const MapComponent = () => {
       >
         {markers.map((poi, idx) => (
           <AdvancedMarker key={poi.name + idx} position={{ lat: poi.lat, lng: poi.lng }}>
-            <Pin background="#DD4B3E" glyphColor="#000" borderColor="#000" />
+            <Pin background="#DD4B3E" glyphColor="#90261D" borderColor="#B74237" />
           </AdvancedMarker>
         ))}
       </Map>
