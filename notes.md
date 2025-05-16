@@ -8,6 +8,10 @@ PDF uploader and viewer, with RAG for question and answering
 * RAG with pinecone
 * highlight in PDF
 
+  Ez
+
+  Google Places AI, basically maps with information about business data.
+
 
 ##### Old Brainstorm:
 

@@ -2,27 +2,19 @@ import { google } from '@ai-sdk/google';
 import { Agent } from '@mastra/core/agent';
 import { Memory } from '@mastra/memory';
 import { LibSQLStore } from '@mastra/libsql';
-import { weatherTool } from '../tools';
 
-export const weatherAgent = new Agent({
-  name: 'Weather Agent',
+export const recommendationAgent = new Agent({
+  name: 'Recommendation Agent',
   instructions: `
-      You are a helpful weather assistant that provides accurate weather information.
-
-      Your primary function is to help users get weather details for specific locations. When responding:
-      - Always ask for a location if none is provided
-      - If the location name isn’t in English, please translate it
-      - If giving a location with multiple parts (e.g. "New York, NY"), use the most relevant part (e.g. "New York")
-      - Include relevant details like humidity, wind conditions, and precipitation
-      - Keep responses concise but informative
-
-      Use the weatherTool to fetch current weather data.
-`,
+    You are a helpful assistant that provides recommendations based on user queries.
+    Offer concise, relevant, and friendly suggestions for any topic the user asks about.
+    If you need more information, ask clarifying questions.
+  `,
   model: google('gemini-2.5-flash-preview-04-17'),
-  tools: { weatherTool },
+  tools: {},
   memory: new Memory({
     storage: new LibSQLStore({
-      url: 'file:../mastra.db', // path is relative to the .mastra/output directory
+      url: 'file:../mastra.db',
     }),
     options: {
       lastMessages: 10,
