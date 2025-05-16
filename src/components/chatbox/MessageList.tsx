@@ -14,14 +14,14 @@ interface MessageListProps {
 }
 
 const MessageList: React.FC<MessageListProps> = ({ messages }) => (
-  <div className="flex flex-col gap-2 p-2 overflow-y-auto bg-gray-800 rounded flex-1">
+  <div className="flex flex-col gap-2 p-2 overflow-y-auto bg-white rounded-xl border border-gray-200 shadow flex-1">
     {messages.map((msg) => (
       <div
         key={msg.id}
-        className={`p-2 rounded max-w-xs break-words ${
+        className={`p-2 rounded-lg max-w-xs break-words border text-sm shadow-sm ${
           msg.sender === "user"
-            ? "bg-blue-700 text-white self-end"
-            : "bg-gray-700 text-gray-100 self-start"
+            ? "bg-blue-50 text-blue-900 border-blue-200 self-end"
+            : "bg-gray-100 text-gray-900 border-gray-200 self-start"
         }`}
       >
         <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]}>

@@ -22,7 +22,7 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSend }) => {
   return (
     <div className="flex gap-2 mt-2">
       <input
-        className="flex-1 border border-gray-700 rounded p-2 bg-gray-800 text-gray-100 placeholder-gray-400 focus:outline-none focus:border-blue-500"
+        className="flex-1 border border-gray-300 rounded-lg p-2 bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-400 shadow-sm"
         type="text"
         value={input}
         onChange={(e) => setInput(e.target.value)}
@@ -30,7 +30,7 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSend }) => {
         placeholder="Type a message..."
       />
       <button
-        className="bg-blue-600 hover:bg-blue-700 text-white w-10 h-10 rounded-lg flex items-center justify-center transition-colors"
+        className="bg-blue-500 hover:bg-blue-600 text-white w-10 h-10 rounded-lg flex items-center justify-center transition-colors shadow"
         onClick={handleSend}
         aria-label="Send"
       >

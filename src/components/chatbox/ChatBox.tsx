@@ -18,7 +18,15 @@ const ChatBox: React.FC = () => {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text }),
+        body: JSON.stringify({
+          messages: [
+            ...messages.map(m => ({
+              role: m.sender === "user" ? "user" : "assistant",
+              content: m.text
+            })),
+            { role: "user", content: text }
+          ]
+        }),
       });
 
       if (!res.body) throw new Error("No response body");
@@ -77,7 +85,7 @@ const ChatBox: React.FC = () => {
   };
 
   return (
-    <div className="w-full h-full border border-gray-700 rounded p-4 bg-gray-900 shadow-lg text-gray-100 flex flex-col">
+    <div className="w-full h-full border border-gray-200 rounded-xl p-4 bg-white shadow-lg text-gray-900 flex flex-col">
       <div className="flex-1 overflow-y-auto">
         <MessageList messages={messages} />
       </div>
