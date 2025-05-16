@@ -114,6 +114,10 @@ export const placesWithReviewsTool = createTool({
         name: z.string(),
         address: z.string(),
         rating: z.number().optional(),
+        location: z.object({
+          latitude: z.number(),
+          longitude: z.number(),
+        }),
         reviews: z.array(
           z.object({
             author: z.object({
@@ -171,6 +175,10 @@ const getPlacesWithReviews = async (textQuery: string, maxResults: number = 5) =
           name: place.displayName?.text || '',
           address: place.formattedAddress || '',
           rating: place.rating,
+          location: {
+            latitude: place.location.latitude,
+            longitude: place.location.longitude,
+          },
           reviews: [],
         };
       }
@@ -189,6 +197,10 @@ const getPlacesWithReviews = async (textQuery: string, maxResults: number = 5) =
         name: detailsData.result.name,
         address: detailsData.result.formatted_address,
         rating: detailsData.result.rating,
+        location: {
+          latitude: place.location.latitude,
+          longitude: place.location.longitude,
+        },
         reviews,
       };
     })
@@ -196,3 +208,5 @@ const getPlacesWithReviews = async (textQuery: string, maxResults: number = 5) =
 
   return { places: results };
 };
+
+export * from './showMapMarkers';

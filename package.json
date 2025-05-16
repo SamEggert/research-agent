@@ -16,6 +16,7 @@
     "@mastra/memory": "^0.3.4",
     "@react-google-maps/api": "^2.20.6",
     "@vercel/blob": "^1.0.1",
+    "@vis.gl/react-google-maps": "^1.5.2",
     "@xyflow/react": "^12.6.4",
     "next": "15.3.2",
     "react": "^19.0.0",

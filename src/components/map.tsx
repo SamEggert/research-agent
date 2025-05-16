@@ -1,47 +1,55 @@
 'use client';
 
-import React from 'react';
-import { GoogleMap, useJsApiLoader } from '@react-google-maps/api';
+import React, { useEffect, useState } from 'react';
+import {
+  APIProvider,
+  Map,
+  AdvancedMarker,
+  Pin,
+} from "@vis.gl/react-google-maps";
 
-const containerStyle = {
-  width: '100%',
-  height: '100%',
-};
+const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!; // Store your API key in .env.local
 
-const center = {
-  lat: 37.7749, // San Francisco as default
-  lng: -122.4194,
-};
+const MapComponent = () => {
+  const [markers, setMarkers] = useState<any[]>([]);
 
-function MapComponent() {
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY; 
-
-  const { isLoaded } = useJsApiLoader({
-    id: 'google-map-script',
-    googleMapsApiKey: apiKey || '', // fallback to empty string if not set
-  });
-
-  const [map, setMap] = React.useState<google.maps.Map | null>(null);
-
-  const onLoad = React.useCallback(function callback(map: google.maps.Map) {
-    setMap(map);
+  useEffect(() => {
+    let isMounted = true;
+    const fetchMarkers = async () => {
+      try {
+        const res = await fetch('/api/maps/markers');
+        const data = await res.json();
+        if (isMounted && data.markers) {
+          setMarkers(data.markers);
+        }
+      } catch (err) {
+        // Optionally handle error
+      }
+    };
+    fetchMarkers();
+    const interval = setInterval(fetchMarkers, 3000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
-  const onUnmount = React.useCallback(function callback(map: google.maps.Map) {
-    setMap(null);
-  }, []);
+  return (
+    <APIProvider apiKey={GOOGLE_MAPS_API_KEY}>
+      <Map
+        defaultZoom={13}
+        defaultCenter={{ lat: -33.860664, lng: 151.208138 }}
+        mapId="e6e131ac87e4a111c61bea89"
+        style={{ width: "100%", height: "100%" }}
+      >
+        {markers.map((poi, idx) => (
+          <AdvancedMarker key={poi.name + idx} position={{ lat: poi.lat, lng: poi.lng }}>
+            <Pin background="#FBBC04" glyphColor="#000" borderColor="#000" />
+          </AdvancedMarker>
+        ))}
+      </Map>
+    </APIProvider>
+  );
+};
 
-  return isLoaded ? (
-    <GoogleMap
-      mapContainerStyle={containerStyle}
-      center={center}
-      zoom={12}
-      onLoad={onLoad}
-      onUnmount={onUnmount}
-    >
-      {/* Add markers or other children here */}
-    </GoogleMap>
-  ) : null;
-}
-
-export default React.memo(MapComponent);
+export default MapComponent;
