@@ -18,17 +18,29 @@ export const showMapMarkersTool = createTool({
   execute: async ({ context }) => {
     const { placeIds } = context;
     // Fetch details for each placeId (from your API or Google Places, etc.)
-    const places = await Promise.all(
-      placeIds.map(async (id) => {
-        // Replace this with your actual fetch logic
-        const res = await fetch(`http://localhost:3000/api/maps/reviews?placeId=${id}`);
-        const data = await res.json();
-        return {
-          id,
-          ...data.place, // or whatever structure you want
-        };
-      })
-    );
+    const places = (
+      await Promise.all(
+        placeIds.map(async (id) => {
+          const res = await fetch(`http://localhost:3000/api/maps/reviews?placeId=${id}`);
+          const data = await res.json();
+          if (
+            data.place &&
+            typeof data.place.lat === 'number' &&
+            typeof data.place.lng === 'number' &&
+            !isNaN(data.place.lat) &&
+            !isNaN(data.place.lng)
+          ) {
+            return {
+              id,
+              ...data.place,
+            };
+          } else {
+            console.warn('Invalid place data for marker:', id, data.place);
+            return null;
+          }
+        })
+      )
+    ).filter(Boolean);
     // Store or use the places array as needed
     await redis.set('latest-map-markers', JSON.stringify(places));
     return { success: true, message: "Markers stored in Redis" };
@@ -39,4 +51,32 @@ export const showMapMarkersTool = createTool({
 export async function getLatestMarkers() {
   const data = await redis.get('latest-map-markers');
   return data ? JSON.parse(data) : [];
+}
+
+export async function refreshMarkers(placeIds: string[]) {
+  const places = (
+    await Promise.all(
+      placeIds.map(async (id) => {
+        const res = await fetch(`http://localhost:3000/api/maps/reviews?placeId=${id}`);
+        const data = await res.json();
+        if (
+          data.place &&
+          typeof data.place.lat === 'number' &&
+          typeof data.place.lng === 'number' &&
+          !isNaN(data.place.lat) &&
+          !isNaN(data.place.lng)
+        ) {
+          return {
+            id,
+            ...data.place,
+          };
+        } else {
+          console.warn('Invalid place data for marker:', id, data.place);
+          return null;
+        }
+      })
+    )
+  ).filter(Boolean);
+  await redis.set('latest-map-markers', JSON.stringify(places));
+  return { success: true, message: "Markers stored in Redis" };
 }
