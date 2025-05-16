@@ -39,16 +39,33 @@ const agentStep = new Step({
   execute: async ({ context }) => {
     const { prompt } = context.triggerData;
     const { preferences, existingRecommendations } = context.getStepResult(fetchUserData);
-    const userPrompt = `${prompt}\nUser preferences: ${JSON.stringify(preferences)}\nExisting recommendations: ${JSON.stringify(existingRecommendations)}`;
+    const userPrompt = `You are a recommendation agent.\nUser prompt: ${prompt}\nUser preferences: ${JSON.stringify(preferences)}\nExisting recommendations: ${JSON.stringify(existingRecommendations)}\n\nPlease recommend places for the user. Respond ONLY in the following JSON format (no explanation outside the JSON):\\n{\\n  \"places\": [ { \"name\": \"Place Name\", \"address\": \"Address or details\" }, ... ],\\n  \"response\": \"A short summary or explanation for the user.\"\\n}`;
     console.log("Prompt sent to LLM:", userPrompt); // Debug prompt
     const result = await recommendationAgent.generate(
       [{ role: "user", content: userPrompt }]
     );
     console.log("LLM result:", result); // Debug LLM result
-    // Assume result.text contains the agent's response
+    let response = result.text ?? "";
+    let places = [];
+    try {
+      // Remove Markdown code block if present
+      response = response.trim();
+      if (response.startsWith("```json")) {
+        response = response.replace(/^```json/, "").replace(/```$/, "").trim();
+      } else if (response.startsWith("```")) {
+        response = response.replace(/^```/, "").replace(/```$/, "").trim();
+      }
+      // Attempt to parse JSON from the LLM response
+      const parsed = JSON.parse(response);
+      response = parsed.response || response;
+      places = parsed.places || [];
+    } catch (e) {
+      // If parsing fails, fallback to plain text and empty places
+      console.warn("Failed to parse LLM response as JSON", e);
+    }
     return {
-      response: result.text ?? "",
-      places: [],
+      response,
+      places,
     };
   },
 });
@@ -56,14 +73,18 @@ const agentStep = new Step({
 // Step 3: Show map markers
 const showMarkersStep = new Step({
   id: "showMarkersStep",
-  execute: async ({ context }) => {
+  execute: async ({ context }: any) => {
     const { places } = context.getStepResult(agentStep);
-    await recommendationAgent.generate(
-      [
-        { role: "user", content: "Show these places on the map: " + JSON.stringify(places) }
-      ],
-      { maxSteps: 2 }
-    );
+    // Type guard for places
+    const safePlaces = Array.isArray(places) ? places : [];
+    // Extract place IDs from the places array
+    const placeIds = safePlaces.map((p: any) => p.place_id || p.id).filter(Boolean);
+    if (placeIds.length === 0) return {};
+    // Call the tool directly
+    await showMapMarkersTool.execute({
+      context: { placeIds },
+      runtimeContext: context.runtimeContext,
+    });
     return {};
   },
 });

@@ -63,3 +63,6 @@ CREATE TRIGGER update_recommendations_updated_at
 BEFORE UPDATE ON recommendations
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
+
+-- Insert a default preferences row so recommendations can reference it
+INSERT INTO preferences (llm_notes) VALUES ('{}');
