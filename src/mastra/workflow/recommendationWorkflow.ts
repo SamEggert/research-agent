@@ -73,7 +73,7 @@ const agentStep = new Step({
 // Step 3: Show map markers
 const showMarkersStep = new Step({
   id: "showMarkersStep",
-  execute: async ({ context }: any) => {
+  execute: async ({ context, runtimeContext }: any) => {
     const { places } = context.getStepResult(agentStep);
     // Type guard for places
     const safePlaces = Array.isArray(places) ? places : [];
@@ -81,10 +81,7 @@ const showMarkersStep = new Step({
     const placeIds = safePlaces.map((p: any) => p.place_id || p.id).filter(Boolean);
     if (placeIds.length === 0) return {};
     // Call the tool directly
-    await showMapMarkersTool.execute({
-      context: { placeIds },
-      runtimeContext: context.runtimeContext,
-    });
+    await showMapMarkersTool.execute({ context: { placeIds }, runtimeContext });
     return {};
   },
 });
