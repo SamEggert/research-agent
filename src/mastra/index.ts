@@ -1,12 +1,12 @@
-
 import { Mastra } from '@mastra/core/mastra';
 import { createLogger } from '@mastra/core/logger';
 import { LibSQLStore } from '@mastra/libsql';
 
-import { weatherAgent } from './agents';
+import { recommendationAgent } from './agents';
+import { recommendationWorkflow } from "./workflow/recommendationWorkflow";
 
 export const mastra = new Mastra({
-  agents: { weatherAgent },
+  agents: { recommendationAgent },
   storage: new LibSQLStore({
     // stores telemetry, evals, ... into memory storage, if it needs to persist, change to file:../mastra.db
     url: ":memory:",
@@ -15,4 +15,5 @@ export const mastra = new Mastra({
     name: 'Mastra',
     level: 'info',
   }),
+  workflows: { recommendationWorkflow },
 });
