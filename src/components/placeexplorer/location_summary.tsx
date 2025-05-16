@@ -62,7 +62,7 @@ const LocationSummary: React.FC<LocationSummaryProps> = ({ name, address, rating
               className="w-12 h-12 rounded-full mr-4 object-cover"
               onError={(e) => {
                 e.currentTarget.onerror = null;
-                e.currentTarget.src = '/default-avatar.png';
+                e.currentTarget.src = '/default-avatar.jpg';
               }}
             />
             <div>

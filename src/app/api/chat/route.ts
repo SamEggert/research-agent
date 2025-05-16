@@ -1,30 +1,56 @@
-import { mastra } from "../../../mastra";
+import { recommendationWorkflow } from "../../../mastra/workflow/recommendationWorkflow";
 
 export async function POST(req: Request) {
   try {
-    const { messages } = await req.json();
-    console.log("Received messages:", messages);
+    const { messages, userId } = await req.json();
     if (!Array.isArray(messages)) {
       return new Response(
         JSON.stringify({ error: "'messages' must be an array." }),
         { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
-    // Ensure each message has the required structure
-    const formattedMessages = messages.map((msg) => {
-      if (typeof msg === "string") {
-        return { role: "user", content: msg };
+
+    // Compose the prompt from the chat history
+    const prompt = messages.map((msg: any) => msg.content).join("\n");
+
+    // You may want to get userId from session/auth if not provided
+    // fallback: anonymous or error
+    // if (!userId) {
+    //   return new Response(JSON.stringify({ error: "Missing userId" }), { status: 400 });
+    // }
+
+    // Start the workflow
+    const { runId, start } = recommendationWorkflow.createRun();
+    const result = await start({ triggerData: { userId: userId || "anonymous", prompt } }) as any;
+    console.log("Full workflow result:", JSON.stringify(result, null, 2));
+
+    // Try to get the response from agentStep (check both .results and .steps)
+    let response = result.results?.agentStep?.output?.response
+      || result.steps?.agentStep?.output?.response;
+
+    // Fallback: search all nested steps for a non-empty .text
+    if (!response) {
+      // Try .results first
+      const stepsObj = result.results || result.steps || {};
+      let foundText = null;
+      for (const key of Object.keys(stepsObj)) {
+        const step = stepsObj[key];
+        if (step?.output?.response && typeof step.output.response === 'string' && step.output.response.trim()) {
+          foundText = step.output.response;
+          break;
+        }
+        if (step?.text && typeof step.text === 'string' && step.text.trim()) {
+          foundText = step.text;
+          break;
+        }
       }
-      if (msg && typeof msg === "object" && msg.role && msg.content) {
-        return { role: msg.role, content: msg.content };
-      }
-      // fallback: treat as user message
-      return { role: "user", content: String(msg) };
-    });
-    console.log("Formatted messages:", formattedMessages);
-    const agent = mastra.getAgent("recommendationAgent");
-    const result = await agent.stream(formattedMessages);
-    return result.toDataStreamResponse();
+      response = foundText || "No response.";
+    }
+
+    return new Response(
+      JSON.stringify({ text: response }),
+      { status: 200, headers: { "Content-Type": "application/json" } }
+    );
   } catch (error: any) {
     console.error("API error:", error);
     return new Response(

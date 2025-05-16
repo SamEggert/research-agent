@@ -20,9 +20,9 @@ const fetchUserData = new Step({
     existingRecommendations: z.any(),
   }),
   execute: async ({ context }) => {
-    const { userId } = context.triggerData;
-    const preferences = await getUserPreferences(userId);
-    const existingRecommendations = await getExistingRecommendations(userId);
+    // const { userId } = context.triggerData;
+    const preferences = await getUserPreferences();
+    const existingRecommendations = await getExistingRecommendations();
     return { preferences, existingRecommendations };
   },
 });
@@ -30,7 +30,7 @@ const fetchUserData = new Step({
 // Step 2: Agent reasoning
 const outputSchema = z.object({
   response: z.string(),
-  places: z.array(z.any()),
+  places: z.array(z.unknown()).optional(),
 });
 
 const agentStep = new Step({
@@ -40,11 +40,16 @@ const agentStep = new Step({
     const { prompt } = context.triggerData;
     const { preferences, existingRecommendations } = context.getStepResult(fetchUserData);
     const userPrompt = `${prompt}\nUser preferences: ${JSON.stringify(preferences)}\nExisting recommendations: ${JSON.stringify(existingRecommendations)}`;
+    console.log("Prompt sent to LLM:", userPrompt); // Debug prompt
     const result = await recommendationAgent.generate(
-      [{ role: "user", content: userPrompt }],
-      { experimental_output: outputSchema }
+      [{ role: "user", content: userPrompt }]
     );
-    return result.object;
+    console.log("LLM result:", result); // Debug LLM result
+    // Assume result.text contains the agent's response
+    return {
+      response: result.text ?? "",
+      places: [],
+    };
   },
 });
 
@@ -68,8 +73,11 @@ const addRecommendationsStep = new Step({
   id: "addRecommendationsStep",
   execute: async ({ context }) => {
     const { places } = context.getStepResult(agentStep);
-    const { userId } = context.triggerData;
-    await addRecommendation(userId, places);
+    if (!places || places.length === 0) {
+      // Nothing to add, skip
+      return {};
+    }
+    await addRecommendation(places);
     return {};
   },
 });

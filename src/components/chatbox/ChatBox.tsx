@@ -7,76 +7,45 @@ const ChatBox: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
 
   const handleSend = async (text: string) => {
-    // Add user message
-    setMessages((msgs) => [
-      ...msgs,
-      { id: Date.now(), text, sender: "user" },
-    ]);
+    if (!text.trim()) return; // Prevent sending empty messages
 
-    // Send to API and get bot response
+    // Add user message
+    const newMessages = [
+      ...messages,
+      { id: Date.now() + Math.random(), text, sender: "user" as const },
+    ];
+    setMessages(newMessages);
+
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: [
-            ...messages.map(m => ({
-              role: m.sender === "user" ? "user" : "assistant",
-              content: m.text
-            })),
-            { role: "user", content: text }
-          ]
+          messages: newMessages.map(m => ({
+            role: m.sender === "user" ? "user" : "assistant",
+            content: m.text
+          }))
         }),
       });
 
-      if (!res.body) throw new Error("No response body");
+      if (!res.ok) throw new Error("API error");
+      const data = await res.json();
+      console.log("API response:", data);
 
-      const reader = res.body.getReader();
-      let botText = "";
-      let done = false;
-      const decoder = new TextDecoder();
+      const botText = typeof data.text === "string" && data.text.trim()
+        ? data.text
+        : "Sorry, I didn't get that. Please try again.";
 
-      while (!done) {
-        const { value, done: doneReading } = await reader.read();
-        done = doneReading;
-        if (value) {
-          const chunk = decoder.decode(value);
-          // Split by newlines in case multiple protocol lines are in one chunk
-          const lines = chunk.split("\n");
-          for (const line of lines) {
-            if (line.startsWith("0:")) {
-              // Remove the "0:" prefix and any surrounding quotes
-              let text = line.slice(2);
-              // If the text is quoted (e.g. "Hello!"), remove quotes
-              if (text.startsWith('"') && text.endsWith('"')) {
-                text = text.slice(1, -1);
-              }
-              // Unescape any escaped characters
-              text = text.replace(/\\"/g, '"');
-              botText += text;
-              setMessages((msgs) => {
-                if (msgs[msgs.length - 1]?.sender === "bot") {
-                  return [
-                    ...msgs.slice(0, -1),
-                    { ...msgs[msgs.length - 1], text: botText },
-                  ];
-                } else {
-                  return [
-                    ...msgs,
-                    { id: Date.now() + 1, text: botText, sender: "bot" },
-                  ];
-                }
-              });
-            }
-          }
-        }
-      }
+      setMessages((msgs) => [
+        ...msgs,
+        { id: Date.now() + Math.random(), text: botText, sender: "bot" as const },
+      ]);
     } catch (err: any) {
       console.error("API error:", err);
       setMessages((msgs) => [
         ...msgs,
         {
-          id: Date.now() + 1,
+          id: Date.now() + Math.random(),
           text: `Sorry, something went wrong. ${err?.message || ""}`,
           sender: "bot",
         },
