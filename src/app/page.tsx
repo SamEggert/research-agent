@@ -6,7 +6,7 @@ export default function Home() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <main className="flex flex-row w-full gap-6 pl-12 pr-12">
-        <div className="w-1/2 h-[95vh]">
+        <div className="w-1/2 h-[95vh] bg-white rounded-xl shadow-lg border border-gray-200 flex items-center justify-center p-4">
           <MapComponent />
         </div>
         <div className="w-1/2 h-[95vh]">
