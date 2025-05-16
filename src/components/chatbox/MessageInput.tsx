@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { FiArrowUp } from "react-icons/fi";
 
 interface MessageInputProps {
   onSend: (text: string) => void;
@@ -29,10 +30,11 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSend }) => {
         placeholder="Type a message..."
       />
       <button
-        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors"
+        className="bg-blue-600 hover:bg-blue-700 text-white w-10 h-10 rounded-lg flex items-center justify-center transition-colors"
         onClick={handleSend}
+        aria-label="Send"
       >
-        Send
+        <FiArrowUp size={20} />
       </button>
     </div>
   );

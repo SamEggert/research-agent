@@ -37,14 +37,14 @@ const MapComponent = () => {
   return (
     <APIProvider apiKey={GOOGLE_MAPS_API_KEY}>
       <Map
-        defaultZoom={13}
-        defaultCenter={{ lat: -33.860664, lng: 151.208138 }}
+        defaultZoom={10}
+        defaultCenter={{ lat: 37.7749, lng: -122.4194 }}
         mapId="e6e131ac87e4a111c61bea89"
         style={{ width: "100%", height: "100%" }}
       >
         {markers.map((poi, idx) => (
           <AdvancedMarker key={poi.name + idx} position={{ lat: poi.lat, lng: poi.lng }}>
-            <Pin background="#FBBC04" glyphColor="#000" borderColor="#000" />
+            <Pin background="#DD4B3E" glyphColor="#000" borderColor="#000" />
           </AdvancedMarker>
         ))}
       </Map>

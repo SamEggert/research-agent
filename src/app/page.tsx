@@ -4,12 +4,12 @@ import ChatBox from "../components/chatbox/ChatBox";
 
 export default function Home() {
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
-      <main className="flex flex-row w-full max-w-6xl gap-6">
-        <div className="w-1/2 h-[80vh]">
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <main className="flex flex-row w-full gap-6 pl-8 pr-8">
+        <div className="w-1/2 h-[95vh]">
           <MapComponent />
         </div>
-        <div className="w-1/2 h-[80vh]">
+        <div className="w-1/2 h-[95vh]">
           <ChatBox />
         </div>
       </main>
