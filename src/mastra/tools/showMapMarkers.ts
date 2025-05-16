@@ -1,5 +1,6 @@
 import { createTool } from '@mastra/core/tools';
 import { z } from 'zod';
+import redis from '../../lib/redis'; // adjust path as needed
 
 // In-memory store for latest markers
 let latestMarkers: any[] = [];
@@ -24,13 +25,14 @@ export const showMapMarkersTool = createTool({
   }),
   execute: async ({ context }) => {
     console.log('showMapMarkersTool', context);
-    // Store the latest markers in memory
-    latestMarkers = context.places;
-    return { success: true, message: "Markers stored in memory" };
+    // Store markers globally (or per session if you want)
+    await redis.set('latest-map-markers', JSON.stringify(context.places));
+    return { success: true, message: "Markers stored in Redis" };
   },
 });
 
 // Export a getter for the latest markers
-export function getLatestMarkers() {
-  return latestMarkers;
+export async function getLatestMarkers() {
+  const data = await redis.get('latest-map-markers');
+  return data ? JSON.parse(data) : [];
 }
